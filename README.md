@@ -4,8 +4,7 @@ This project is a ZIP file reader which gives a decompressed stream of ZIP.
 This project is implemented with the ZIP format specification given in below wiki page.
 https://en.wikipedia.org/wiki/ZIP_(file_format)
 
-##Types
-###ZipStream
+## Types
 ```
 type ZipStream struct {
     Reader   io.Reader
@@ -13,7 +12,7 @@ type ZipStream struct {
 ```
 **ZipStream** accepts an io.Reader to ZIP file as input.
 
-##Functions
+## Functions
 ```
 func Next() (*LocalFileHeader, io.Reader, error)
 ```
@@ -21,7 +20,7 @@ Next() function will return the LocalFileHeader object which has file name and o
 It also returns the io.Reader to the next file to read. Function will return io.EOF when there 
 are no more files in ZIP.
 
-####Note: If you don't want to read current file, then you need to discard the content of current file. 
+**Note: If you don't want to read current file, then you need to discard the content of current file.** 
 
 **io.Copy(ioutil.Discard, reader)**
 
