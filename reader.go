@@ -15,7 +15,7 @@ import (
 )
 
 type ZipStream struct {
-	reader   io.Reader
+	Reader   io.Reader
 	previous []byte
 }
 
@@ -25,19 +25,19 @@ type ZipStream struct {
 // High level workflow:
 // Read Local File header
 // Read data until Descriptor or next Local File Header or Central Directory Header
-// if Compression method is set to 8 use deflate reader to read data.
+// if Compression method is set to 8 use deflate Reader to read data.
 // Next will return the io.EOF when the zip end is reached.
 // Read will return the io.EOF when current file end is reached.
 
 // Next reads the local file header of the next file and returns the Reader to read data.
-// if compression method is 8, then deflate reader will be returned.
+// if compression method is 8, then deflate Reader will be returned.
 func (z *ZipStream) Next() (*LocalFileHeader, io.Reader, error) {
 	var reader io.Reader
 	var totalDataRead = 0
 	if z.previous != nil && len(z.previous) != 0 {
-		reader = AppendReader(bytes.NewReader(z.previous), z.reader)
+		reader = AppendReader(bytes.NewReader(z.previous), z.Reader)
 	} else {
-		reader = z.reader
+		reader = z.Reader
 	}
 
 	buff := make([]byte, 4)
@@ -80,13 +80,13 @@ func (z *ZipStream) Next() (*LocalFileHeader, io.Reader, error) {
 	return nil, nil, fmt.Errorf("invalid signature: %x", binary.LittleEndian.Uint32(buff))
 }
 
-// Read reads the data from the previous remaining data and from reader to read next data.
+// Read reads the data from the previous remaining data and from Reader to read next data.
 func (z *ZipStream) Read(p []byte) (n int, err error) {
 	var reader io.Reader
 	if z.previous != nil && len(z.previous) != 0 {
-		reader = AppendReader(bytes.NewReader(z.previous), z.reader)
+		reader = AppendReader(bytes.NewReader(z.previous), z.Reader)
 	} else {
-		reader = z.reader
+		reader = z.Reader
 	}
 	n, err = reader.Read(p)
 	p = p[:n]
@@ -110,9 +110,9 @@ func (z *ZipStream) Read(p []byte) (n int, err error) {
 
 			if discardDataDescriptor {
 				if z.previous != nil && len(z.previous) != 0 {
-					reader = AppendReader(bytes.NewReader(z.previous), z.reader)
+					reader = AppendReader(bytes.NewReader(z.previous), z.Reader)
 				} else {
-					reader = z.reader
+					reader = z.Reader
 				}
 				buff := make([]byte, 40)
 				n, err = reader.Read(buff)
@@ -210,4 +210,3 @@ func (z *ZipStream) readLocalFileHeader(reader io.Reader) (*LocalFileHeader, int
 	}
 	return localFileHeader, totalDataRead, nil
 }
-
